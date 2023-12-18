@@ -34,6 +34,10 @@ func Qa(cmd *cobra.Command, args []string) error {
 	apiKey := viper.GetString(flags.ApiKey)
 	modelName := viper.GetString(flags.Model)
 
+	if len(apiKey) == 0 || len(modelName) == 0 {
+		return fmt.Errorf("api-key or model cannot be empty")
+	}
+
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		return fmt.Errorf("failed to create new genai client: %w", err)
