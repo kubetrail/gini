@@ -20,13 +20,6 @@ func Qa(cmd *cobra.Command, args []string) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	go func() {
-		select {
-		case <-ctx.Done():
-			os.Exit(0)
-		}
-	}()
-
 	_ = viper.BindPFlag(flags.ApiKey, cmd.Flag(flags.ApiKey))
 	_ = viper.BindPFlag(flags.Model, cmd.Flag(flags.Model))
 	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
@@ -37,6 +30,13 @@ func Qa(cmd *cobra.Command, args []string) error {
 	if len(apiKey) == 0 || len(modelName) == 0 {
 		return fmt.Errorf("api-key or model cannot be empty")
 	}
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			os.Exit(0)
+		}
+	}()
 
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
