@@ -31,13 +31,6 @@ func Qa(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("api-key or model cannot be empty")
 	}
 
-	go func() {
-		select {
-		case <-ctx.Done():
-			os.Exit(0)
-		}
-	}()
-
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		return fmt.Errorf("failed to create new genai client: %w", err)
@@ -55,11 +48,11 @@ func Qa(cmd *cobra.Command, args []string) error {
 		return res, nil
 	}
 
-	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "please type query below\npress enter twice to send query\nquit or exit to end session\n")
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "please type prompt below\npress enter twice to send prompt\njust enter to quit\n")
 
 OuterLoop:
-	for {
-		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "> ")
+	for i := 0; ; i++ {
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), fmt.Sprintf("[%d]>>> ", i+1))
 
 		scanner := bufio.NewScanner(os.Stdin)
 		var lines []string
@@ -72,9 +65,7 @@ OuterLoop:
 			case <-ctx.Done():
 				break InnerLoop
 			default:
-				if len(line) == 0 ||
-					strings.ToLower(line) == "quit" ||
-					strings.ToLower(line) == "exit" {
+				if len(line) == 0 {
 					break InnerLoop
 				}
 				lines = append(lines, line)
@@ -93,11 +84,13 @@ OuterLoop:
 		case <-ctx.Done():
 			break OuterLoop
 		default:
-			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "sending...")
+			s := "... sending prompt... wait"
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", s)
 			res, err := send(strings.Join(lines, "\n"))
 			if err != nil {
 				return err
 			}
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", strings.Repeat(" ", len(s)+2))
 			printResponse(res)
 		}
 	}
