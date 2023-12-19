@@ -26,11 +26,13 @@ func Chat(cmd *cobra.Command, args []string) error {
 	_ = viper.BindPFlag(flags.ApiKey, cmd.Flag(flags.ApiKey))
 	_ = viper.BindPFlag(flags.Model, cmd.Flag(flags.Model))
 	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
+	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
 	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
 
 	apiKey := viper.GetString(flags.ApiKey)
 	modelName := viper.GetString(flags.Model)
 	autoSave := viper.GetBool(flags.AutoSave)
+	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
 
 	fileName := fmt.Sprintf("history-%s.txt", uuid.New().String())
 	var fileWriter *bufio.Writer
@@ -58,15 +60,6 @@ func Chat(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create new genai client: %w", err)
 	}
 	defer client.Close()
-
-	modelIterator := client.ListModels(ctx)
-	for {
-		m, err := modelIterator.Next()
-		if err != nil {
-			break
-		}
-		fmt.Println("***", m.Name, m.DisplayName)
-	}
 
 	model := client.GenerativeModel(modelName)
 	cs := model.StartChat()
@@ -123,6 +116,28 @@ OuterLoop:
 				return err
 			}
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", strings.Repeat(" ", len(s)+2))
+
+			if allowHarmProbability != flags.HarmProbabilityUnspecified {
+				var harmProbability genai.HarmProbability
+				switch allowHarmProbability {
+				case flags.HarmProbabilityNegligible:
+					harmProbability = genai.HarmProbabilityNegligible
+				case flags.HarmProbabilityLow:
+					harmProbability = genai.HarmProbabilityLow
+				case flags.HarmProbabilityMedium:
+					harmProbability = genai.HarmProbabilityMedium
+				case flags.HarmProbabilityHigh:
+					harmProbability = genai.HarmProbabilityHigh
+				default:
+					return fmt.Errorf("invalid harm probability:%s", allowHarmProbability)
+				}
+
+				for _, rating := range res.PromptFeedback.SafetyRatings {
+					if rating.Probability > harmProbability {
+						return fmt.Errorf("output harm probability threshold crossed")
+					}
+				}
+			}
 
 			if autoSave {
 				if _, err := fileWriter.WriteString(fmt.Sprintf("[%d]>>> %s\n", i+1, prompt)); err != nil {
