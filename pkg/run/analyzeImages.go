@@ -3,7 +3,6 @@ package run
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"strings"
@@ -18,7 +17,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-func Chat(cmd *cobra.Command, args []string) error {
+func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -32,6 +31,8 @@ func Chat(cmd *cobra.Command, args []string) error {
 	_ = viper.BindPFlag(flags.MaxOutputTokens, cmd.Flag(flags.MaxOutputTokens))
 	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
 	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
+	_ = viper.BindPFlag(flags.ImageFiles, cmd.Flag(flags.ImageFiles))
+	_ = viper.BindPFlag(flags.Formats, cmd.Flag(flags.Formats))
 	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
 
 	apiKey := viper.GetString(flags.ApiKey)
@@ -43,6 +44,8 @@ func Chat(cmd *cobra.Command, args []string) error {
 	maxOutputTokens := viper.GetInt32(flags.MaxOutputTokens)
 	autoSave := viper.GetBool(flags.AutoSave)
 	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
+	imageFiles := viper.GetStringSlice(flags.ImageFiles)
+	formats := viper.GetStringSlice(flags.Formats)
 
 	if len(apiKey) == 0 || len(modelName) == 0 {
 		return fmt.Errorf("api-key or model cannot be empty")
@@ -91,21 +94,35 @@ func Chat(cmd *cobra.Command, args []string) error {
 	if maxOutputTokens >= 0 {
 		model.SetMaxOutputTokens(maxOutputTokens)
 	}
-	cs := model.StartChat()
 
-	send := func(msg string) (*genai.GenerateContentResponse, error) {
-		res, err := cs.SendMessage(ctx, genai.Text(msg))
-		if err != nil {
-			return nil, fmt.Errorf("failed to send message: %w", err)
+	parts := make([]genai.Part, len(imageFiles)+1)
+	if formats == nil {
+		formats = make([]string, len(imageFiles))
+		for i := range formats {
+			formats[i] = flags.FormatJpeg
 		}
-		return res, nil
+	} else {
+		if len(formats) > len(imageFiles) {
+			return fmt.Errorf("cannot provide more formats than number of images")
+		}
+		for i := len(formats); i < len(imageFiles); i++ {
+			formats = append(formats, flags.FormatJpeg)
+		}
 	}
 
-	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "please type prompt below\npress enter twice to send prompt\njust enter to quit\n")
+	for i, imageFile := range imageFiles {
+		b, err := os.ReadFile(imageFile)
+		if err != nil {
+			return fmt.Errorf("failed to read image file: %w", err)
+		}
+		parts[i] = genai.ImageData(formats[i], b)
+	}
 
-OuterLoop:
-	for i := 0; ; i++ {
-		_, _ = fmt.Fprintf(cmd.OutOrStdout(), fmt.Sprintf("[%d]>>> ", i+1))
+	var prompt string
+	if len(args) > 0 {
+		prompt = strings.Join(args, " ")
+	} else {
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), ">>> ")
 
 		scanner := bufio.NewScanner(os.Stdin)
 		var lines []string
@@ -130,54 +147,54 @@ OuterLoop:
 		}
 
 		if len(lines) == 0 {
-			break OuterLoop
+			return nil
 		}
 
-		select {
-		case <-ctx.Done():
-			break OuterLoop
+		prompt = strings.Join(lines, "\n")
+	}
+
+	parts[len(imageFiles)] = genai.Text(prompt)
+
+	send := func(msg string) (*genai.GenerateContentResponse, error) {
+		res, err := model.GenerateContent(ctx, parts...)
+		if err != nil {
+			return nil, fmt.Errorf("failure at backend: %w", err)
+		}
+		return res, nil
+	}
+
+	s := "... sending prompt... please wait"
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", s)
+	res, err := send(prompt)
+	if err != nil {
+		return err
+	}
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", strings.Repeat(" ", len(s)+2))
+
+	if allowHarmProbability != flags.HarmProbabilityUnspecified {
+		var harmProbability genai.HarmProbability
+		switch allowHarmProbability {
+		case flags.HarmProbabilityNegligible:
+			harmProbability = genai.HarmProbabilityNegligible
+		case flags.HarmProbabilityLow:
+			harmProbability = genai.HarmProbabilityLow
+		case flags.HarmProbabilityMedium:
+			harmProbability = genai.HarmProbabilityMedium
+		case flags.HarmProbabilityHigh:
+			harmProbability = genai.HarmProbabilityHigh
 		default:
-			s := "... sending prompt... please wait"
-			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", s)
-			prompt := strings.Join(lines, "\n")
-			res, err := send(prompt)
-			if err != nil {
-				return err
-			}
-			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", strings.Repeat(" ", len(s)+2))
+			return fmt.Errorf("invalid harm probability:%s", allowHarmProbability)
+		}
 
-			if allowHarmProbability != flags.HarmProbabilityUnspecified {
-				var harmProbability genai.HarmProbability
-				switch allowHarmProbability {
-				case flags.HarmProbabilityNegligible:
-					harmProbability = genai.HarmProbabilityNegligible
-				case flags.HarmProbabilityLow:
-					harmProbability = genai.HarmProbabilityLow
-				case flags.HarmProbabilityMedium:
-					harmProbability = genai.HarmProbabilityMedium
-				case flags.HarmProbabilityHigh:
-					harmProbability = genai.HarmProbabilityHigh
-				default:
-					return fmt.Errorf("invalid harm probability:%s", allowHarmProbability)
-				}
-
-				for _, rating := range res.PromptFeedback.SafetyRatings {
-					if rating.Probability > harmProbability {
-						return fmt.Errorf("output harm probability threshold crossed")
-					}
-				}
-			}
-
-			if autoSave {
-				if _, err := fileWriter.WriteString(fmt.Sprintf("[%d]>>> %s\n", i+1, prompt)); err != nil {
-					return fmt.Errorf("failed to write to history file: %w", err)
-				}
-			}
-
-			if err := printResponse(res, cmd.OutOrStdout(), autoSave, fileWriter); err != nil {
-				return fmt.Errorf("failed to write response: %w", err)
+		for _, rating := range res.PromptFeedback.SafetyRatings {
+			if rating.Probability > harmProbability {
+				return fmt.Errorf("output harm probability threshold crossed")
 			}
 		}
+	}
+
+	if err := printResponse(res, cmd.OutOrStdout(), autoSave, fileWriter); err != nil {
+		return fmt.Errorf("failed to write response: %w", err)
 	}
 
 	if autoSave {
@@ -187,30 +204,6 @@ OuterLoop:
 
 		if _, err := fmt.Fprintln(cmd.OutOrStdout(), fmt.Sprintf("history saved to %s", fileName)); err != nil {
 			return fmt.Errorf("failed to write to output: %w", err)
-		}
-	}
-
-	return nil
-}
-
-func printResponse(resp *genai.GenerateContentResponse, w io.Writer, autoSave bool, fileWriter *bufio.Writer) error {
-	if autoSave {
-		if _, err := fileWriter.WriteString(fmt.Sprintf("%s\n", "[response]>>>")); err != nil {
-			return fmt.Errorf("failed to write to history file: %w", err)
-		}
-	}
-	for _, cand := range resp.Candidates {
-		if cand.Content != nil {
-			for _, part := range cand.Content.Parts {
-				if _, err := fmt.Fprintln(w, part); err != nil {
-					return fmt.Errorf("failed to write to output: %w", err)
-				}
-				if autoSave {
-					if _, err := fileWriter.WriteString(fmt.Sprintf("%s\n", part)); err != nil {
-						return fmt.Errorf("failed to write to history file: %w", err)
-					}
-				}
-			}
 		}
 	}
 

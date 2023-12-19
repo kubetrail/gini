@@ -75,6 +75,24 @@ Therefore, the average of the given list of numbers is approximately 0.115819069
 [4]>>>
 ```
 
+## image analysis
+Images can be analyzed using a combination of raw image data and associated text prompt.
+Below is an example:
+```bash
+gini analyze images \
+  --image-files seagull-on-a-rock.jpg \
+  --formats jpeg \
+  could you please detect objects in the provided image
+```
+```text
+ A seagull standing on a rock in front of a blurred background of green plants.
+ The seagull is gray and white with a yellow beak. The rock is brown and the background is green.
+```
+
+> Please note that image analysis is conducted using `gemini-pro-vision` model by default.
+> Furthermore, please make sure `--formats` match corresponding image format, or leave it
+> blank if all images are jpeg images.
+
 ## list models
 Following models can be selected when performing a task. Select model by via
 `--model` flag using its name. For example `gini chat --model=models/gemini-pro-vision` etc.
