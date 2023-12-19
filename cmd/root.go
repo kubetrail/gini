@@ -20,7 +20,6 @@ import (
 	"os"
 
 	"github.com/kubetrail/gem/pkg/flags"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -30,13 +29,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "gem",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "CLI to interact with Google Gemini AI model",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -67,6 +60,7 @@ func init() {
 	f := rootCmd.PersistentFlags()
 	f.String(flags.ApiKey, "", fmt.Sprintf("API Key (Env. %s)", flags.ApiKeyEnv))
 	f.String(flags.Model, flags.ModelGeminiPro, "Model name")
+	f.Bool(flags.AutoSave, false, "Auto save chat history")
 
 }
 

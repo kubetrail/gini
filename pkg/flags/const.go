@@ -1,8 +1,9 @@
 package flags
 
 const (
-	ApiKey = "api-key"
-	Model  = "model"
+	ApiKey   = "api-key"
+	Model    = "model"
+	AutoSave = "auto-save"
 )
 
 const (
