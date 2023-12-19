@@ -10,6 +10,16 @@ const (
 	Temperature          = "temperature"
 	CandidateCount       = "candidate-count"
 	MaxOutputTokens      = "max-output-tokens"
+	ImageFiles           = "image-files"
+	Formats              = "formats"
+)
+
+const (
+	FormatPng  = "png"
+	FormatJpeg = "jpeg"
+	FormatHeic = "heic"
+	FormatHeif = "heif"
+	FormatWebp = "webp"
 )
 
 const (
