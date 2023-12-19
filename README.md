@@ -20,8 +20,9 @@ and setup an env variable `API_KEY` for it.
 
 ## usage
 ```bash
-gem qa
+gem qa [--auto-save]
 ```
+`--auto-save` flag will save chat history to a randomly generated filename.
 
 ## example chat history
 

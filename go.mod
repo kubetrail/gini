@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/google/generative-ai-go v0.5.0
+	github.com/google/uuid v1.4.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	google.golang.org/api v0.154.0
