@@ -61,6 +61,7 @@ func init() {
 	f.String(flags.ApiKey, "", fmt.Sprintf("API Key (Env. %s)", flags.ApiKeyEnv))
 	f.String(flags.Model, flags.ModelGeminiPro, "Model name")
 	f.Bool(flags.AutoSave, false, "Auto save chat history")
+	f.String(flags.AllowHarmProbability, flags.HarmProbabilityNegligible, "Allow harm probability at or below specified level")
 
 	_ = rootCmd.RegisterFlagCompletionFunc(
 		flags.Model,
@@ -76,6 +77,27 @@ func init() {
 					flags.ModelGeminiPro,
 					flags.ModelGeminiProVision,
 					flags.ModelEmbedding001,
+				},
+				cobra.ShellCompDirectiveDefault
+		},
+	)
+
+	_ = rootCmd.RegisterFlagCompletionFunc(
+		flags.AllowHarmProbability,
+		func(
+			cmd *cobra.Command,
+			args []string,
+			toComplete string,
+		) (
+			[]string,
+			cobra.ShellCompDirective,
+		) {
+			return []string{
+					flags.HarmProbabilityUnspecified,
+					flags.HarmProbabilityNegligible,
+					flags.HarmProbabilityLow,
+					flags.HarmProbabilityMedium,
+					flags.HarmProbabilityHigh,
 				},
 				cobra.ShellCompDirectiveDefault
 		},
