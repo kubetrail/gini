@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/kubetrail/gini/pkg/flags"
 	"github.com/kubetrail/gini/pkg/run"
 	"github.com/spf13/cobra"
 )
@@ -29,14 +30,29 @@ var chatCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(chatCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// chatCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// chatCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	f := chatCmd.Flags()
+	f.String(flags.Model, flags.ModelGeminiPro, "Model name")
+	f.Float32(flags.TopP, -1, "Model TopP value (-1 means do not configure)")
+	f.Int32(flags.TopK, -1, "Model TopK value (-1 means do not configure)")
+	f.Float32(flags.Temperature, -1, "Model temperature (-1 means do not configure)")
+	f.Int32(flags.CandidateCount, -1, "Model candidate count (-1 means do not configure)")
+	f.Int32(flags.MaxOutputTokens, -1, "Model max output tokens (-1 means do not configure)")
+	_ = chatCmd.RegisterFlagCompletionFunc(
+		flags.Model,
+		func(
+			cmd *cobra.Command,
+			args []string,
+			toComplete string,
+		) (
+			[]string,
+			cobra.ShellCompDirective,
+		) {
+			return []string{
+					flags.ModelGeminiPro,
+					flags.ModelGeminiProVision,
+					flags.ModelEmbedding001,
+				},
+				cobra.ShellCompDirectiveDefault
+		},
+	)
 }
