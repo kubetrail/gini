@@ -16,18 +16,18 @@ go install github.com/kubetrail/gem@latest
 ```
 
 Get an API key from [Google AI studio](https://makersuite.google.com/app/apikey)
-and setup an env variable `API_KEY` for it.
+and setup an env variable `GOOGLE_API_KEY` for it.
 
 ## usage
 ```bash
-gem qa [--auto-save]
+gem chat [--auto-save]
 ```
 `--auto-save` flag will save chat history to a randomly generated filename.
 
 ## example chat history
 
 ```bash
-gem qa
+gem chat
 ```
 ```text
 please type prompt below
@@ -63,4 +63,57 @@ To calculate the average, we can sum up all the numbers and divide by the total 
 Therefore, the average of the given list of numbers is approximately 0.115819069.
 
 [4]>>>
+```
+
+## list models
+Following models can be selected when performing a task. Select model by via
+`--model` flag using its name. For example `gem chat --model=models/gemini-pro-vision` etc.
+
+```bash
+gem list models
+```
+```yaml
+name: models/gemini-pro
+basemodeid: ""
+version: "001"
+displayname: Gemini Pro
+description: The best model for scaling across a wide range of tasks
+inputtokenlimit: 30720
+outputtokenlimit: 2048
+supportedgenerationmethods:
+    - generateContent
+    - countTokens
+temperature: 0.9
+topp: 1
+topk: 1
+```
+```yaml
+name: models/gemini-pro-vision
+basemodeid: ""
+version: "001"
+displayname: Gemini Pro Vision
+description: The best image understanding model to handle a broad range of applications
+inputtokenlimit: 12288
+outputtokenlimit: 4096
+supportedgenerationmethods:
+    - generateContent
+    - countTokens
+temperature: 0.4
+topp: 1
+topk: 32
+```
+```yaml
+name: models/embedding-001
+basemodeid: ""
+version: "001"
+displayname: Embedding 001
+description: Obtain a distributed representation of a text.
+inputtokenlimit: 2048
+outputtokenlimit: 1
+supportedgenerationmethods:
+    - embedContent
+    - countTextTokens
+temperature: 0
+topp: 0
+topk: 0
 ```
