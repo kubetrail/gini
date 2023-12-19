@@ -5,6 +5,11 @@ const (
 	Model                = "model"
 	AutoSave             = "auto-save"
 	AllowHarmProbability = "allow-harm-probability"
+	TopK                 = "top-k"
+	TopP                 = "top-p"
+	Temperature          = "temperature"
+	CandidateCount       = "candidate-count"
+	MaxOutputTokens      = "max-output-tokens"
 )
 
 const (

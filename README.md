@@ -1,5 +1,5 @@
 # gini
-Simple CLI for simple i/o with Google Gemini AI model
+CLI for simple i/o with Google Gemini AI model
 
 ## disclaimer
 > The use of this tool does not guarantee security or usability for any
@@ -133,3 +133,7 @@ displaying content that could be harmful. Change it at your own risk, for exampl
 ```bash
 gini chat --allow-harm-probability=medium --auto-save
 ```
+
+## advanced config
+Model config params such as `--top-p`, `--top-k`, `--temperature`, `--candiate-count` and 
+`--max-output-tokens` can be supplied for fine tuning

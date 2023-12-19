@@ -59,7 +59,6 @@ func init() {
 
 	f := rootCmd.PersistentFlags()
 	f.String(flags.ApiKey, "", fmt.Sprintf("API Key (Env. %s)", flags.ApiKeyEnv))
-	f.String(flags.Model, flags.ModelGeminiPro, "Model name")
 	f.Bool(flags.AutoSave, false, "Auto save chat history")
 	f.String(flags.AllowHarmProbability, flags.HarmProbabilityNegligible,
 		fmt.Sprintf(
@@ -70,25 +69,6 @@ func init() {
 			flags.HarmProbabilityMedium,
 			flags.HarmProbabilityHigh,
 		),
-	)
-
-	_ = rootCmd.RegisterFlagCompletionFunc(
-		flags.Model,
-		func(
-			cmd *cobra.Command,
-			args []string,
-			toComplete string,
-		) (
-			[]string,
-			cobra.ShellCompDirective,
-		) {
-			return []string{
-					flags.ModelGeminiPro,
-					flags.ModelGeminiProVision,
-					flags.ModelEmbedding001,
-				},
-				cobra.ShellCompDirectiveDefault
-		},
 	)
 
 	_ = rootCmd.RegisterFlagCompletionFunc(

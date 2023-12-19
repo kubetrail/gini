@@ -25,12 +25,22 @@ func Chat(cmd *cobra.Command, args []string) error {
 
 	_ = viper.BindPFlag(flags.ApiKey, cmd.Flag(flags.ApiKey))
 	_ = viper.BindPFlag(flags.Model, cmd.Flag(flags.Model))
+	_ = viper.BindPFlag(flags.TopP, cmd.Flag(flags.TopP))
+	_ = viper.BindPFlag(flags.TopK, cmd.Flag(flags.TopK))
+	_ = viper.BindPFlag(flags.Temperature, cmd.Flag(flags.Temperature))
+	_ = viper.BindPFlag(flags.CandidateCount, cmd.Flag(flags.CandidateCount))
+	_ = viper.BindPFlag(flags.MaxOutputTokens, cmd.Flag(flags.MaxOutputTokens))
 	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
 	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
 	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
 
 	apiKey := viper.GetString(flags.ApiKey)
 	modelName := viper.GetString(flags.Model)
+	topP := float32(viper.GetFloat64(flags.TopP))
+	topK := viper.GetInt32(flags.TopK)
+	temperature := float32(viper.GetFloat64(flags.Temperature))
+	candidateCount := viper.GetInt32(flags.CandidateCount)
+	maxOutputTokens := viper.GetInt32(flags.MaxOutputTokens)
 	autoSave := viper.GetBool(flags.AutoSave)
 	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
 
@@ -50,7 +60,12 @@ func Chat(cmd *cobra.Command, args []string) error {
 
 		fileWriter = bufio.NewWriter(f)
 
-		if _, err := fileWriter.WriteString(fmt.Sprintf("%s\n", time.Now().String())); err != nil {
+		if _, err := fileWriter.WriteString(
+			fmt.Sprintf("Command: %s\nTimestamp: %s\n",
+				strings.Join(os.Args, " "),
+				time.Now().String(),
+			),
+		); err != nil {
 			return fmt.Errorf("failed to write to history file: %w", err)
 		}
 	}
@@ -62,6 +77,21 @@ func Chat(cmd *cobra.Command, args []string) error {
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
+	if topP >= 0 {
+		model.SetTopP(topP)
+	}
+	if topK >= 0 {
+		model.SetTopK(topK)
+	}
+	if temperature >= 0 {
+		model.SetTemperature(temperature)
+	}
+	if candidateCount >= 0 {
+		model.SetCandidateCount(candidateCount)
+	}
+	if maxOutputTokens >= 0 {
+		model.SetMaxOutputTokens(maxOutputTokens)
+	}
 	cs := model.StartChat()
 
 	send := func(msg string) (*genai.GenerateContentResponse, error) {
