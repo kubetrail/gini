@@ -7,9 +7,11 @@ const (
 )
 
 const (
-	ApiKeyEnv = "API_KEY"
+	ApiKeyEnv = "GOOGLE_API_KEY"
 )
 
 const (
-	ModelGeminiPro = "gemini-pro"
+	ModelGeminiPro       = "models/gemini-pro"
+	ModelGeminiProVision = "models/gemini-pro-vision"
+	ModelEmbedding001    = "models/embedding-001"
 )

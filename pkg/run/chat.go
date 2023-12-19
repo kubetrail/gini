@@ -18,7 +18,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-func Qa(cmd *cobra.Command, args []string) error {
+func Chat(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -58,6 +58,15 @@ func Qa(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create new genai client: %w", err)
 	}
 	defer client.Close()
+
+	modelIterator := client.ListModels(ctx)
+	for {
+		m, err := modelIterator.Next()
+		if err != nil {
+			break
+		}
+		fmt.Println("***", m.Name, m.DisplayName)
+	}
 
 	model := client.GenerativeModel(modelName)
 	cs := model.StartChat()

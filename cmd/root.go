@@ -62,6 +62,24 @@ func init() {
 	f.String(flags.Model, flags.ModelGeminiPro, "Model name")
 	f.Bool(flags.AutoSave, false, "Auto save chat history")
 
+	_ = rootCmd.RegisterFlagCompletionFunc(
+		flags.Model,
+		func(
+			cmd *cobra.Command,
+			args []string,
+			toComplete string,
+		) (
+			[]string,
+			cobra.ShellCompDirective,
+		) {
+			return []string{
+					flags.ModelGeminiPro,
+					flags.ModelGeminiProVision,
+					flags.ModelEmbedding001,
+				},
+				cobra.ShellCompDirectiveDefault
+		},
+	)
 }
 
 // initConfig reads in config file and ENV variables if set.
