@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kubetrail/gem/pkg/flags"
+	"github.com/kubetrail/gini/pkg/flags"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -28,8 +28,8 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gem",
-	Short: "CLI to interact with Google Gemini AI model",
+	Use:   "gini",
+	Short: "Simple CLI to interact with Google Gemini AI models",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -51,7 +51,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gem.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gini.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -61,7 +61,16 @@ func init() {
 	f.String(flags.ApiKey, "", fmt.Sprintf("API Key (Env. %s)", flags.ApiKeyEnv))
 	f.String(flags.Model, flags.ModelGeminiPro, "Model name")
 	f.Bool(flags.AutoSave, false, "Auto save chat history")
-	f.String(flags.AllowHarmProbability, flags.HarmProbabilityNegligible, "Allow harm probability at or below specified level")
+	f.String(flags.AllowHarmProbability, flags.HarmProbabilityNegligible,
+		fmt.Sprintf(
+			"Harm probability (%s, %s, %s, %s, %s)",
+			flags.HarmProbabilityUnspecified,
+			flags.HarmProbabilityNegligible,
+			flags.HarmProbabilityLow,
+			flags.HarmProbabilityMedium,
+			flags.HarmProbabilityHigh,
+		),
+	)
 
 	_ = rootCmd.RegisterFlagCompletionFunc(
 		flags.Model,
@@ -114,10 +123,10 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".gem" (without extension).
+		// Search config in home directory with name ".gini" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".gem")
+		viper.SetConfigName(".gini")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

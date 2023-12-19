@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/google/generative-ai-go/genai"
-	"github.com/kubetrail/gem/pkg/flags"
+	"github.com/kubetrail/gini/pkg/flags"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/api/iterator"

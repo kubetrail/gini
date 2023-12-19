@@ -29,13 +29,13 @@ var completionCmd = &cobra.Command{
 
 Bash:
 
-  $ source <(gem completion bash)
+  $ source <(gini completion bash)
 
   # To load completions for each session, execute once:
   # Linux:
-  $ gem completion bash > /etc/bash_completion.d/gem
+  $ gini completion bash > /etc/bash_completion.d/gini
   # macOS:
-  $ gem completion bash > /usr/local/etc/bash_completion.d/gem
+  $ gini completion bash > /usr/local/etc/bash_completion.d/gini
 
 Zsh:
 
@@ -45,23 +45,23 @@ Zsh:
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
   # To load completions for each session, execute once:
-  $ gem completion zsh > "${fpath[1]}/_gem"
+  $ gini completion zsh > "${fpath[1]}/_gini"
 
   # You will need to start a new shell for this setup to take effect.
 
 fish:
 
-  $ gem completion fish | source
+  $ gini completion fish | source
 
   # To load completions for each session, execute once:
-  $ gem completion fish > ~/.config/fish/completions/gem.fish
+  $ gini completion fish > ~/.config/fish/completions/gini.fish
 
 PowerShell:
 
-  PS> gem completion powershell | Out-String | Invoke-Expression
+  PS> gini completion powershell | Out-String | Invoke-Expression
 
   # To load completions for every new session, run:
-  PS> gem completion powershell > gem.ps1
+  PS> gini completion powershell > gini.ps1
   # and source this file from your PowerShell profile.
 `,
 	DisableFlagsInUseLine: true,

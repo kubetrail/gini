@@ -16,7 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/kubetrail/gem/pkg/run"
+	"github.com/kubetrail/gini/pkg/run"
 	"github.com/spf13/cobra"
 )
 
