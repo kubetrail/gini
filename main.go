@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/kubetrail/gem/cmd"
+import "github.com/kubetrail/gini/cmd"
 
 func main() {
 	cmd.Execute()

@@ -1,5 +1,5 @@
-# gem
-CLI for simple i/o with Google Gemini AI model
+# gini
+Simple CLI for simple i/o with Google Gemini AI model
 
 ## disclaimer
 > The use of this tool does not guarantee security or usability for any
@@ -12,22 +12,32 @@ This step assumes you have [Go compiler toolchain](https://go.dev/dl/)
 installed on your system.
 
 ```bash
-go install github.com/kubetrail/gem@latest
+go install github.com/kubetrail/gini@latest
 ```
 
 Get an API key from [Google AI studio](https://makersuite.google.com/app/apikey)
 and setup an env variable `GOOGLE_API_KEY` for it.
 
+Setup shell completion. See more info at:
+```bash
+gini completion -h
+```
+
+For instance, setup `bash` completion by adding following line to your `.bashrc`
+```text
+source <(gini completion bash)
+```
+
 ## usage
 ```bash
-gem chat [--auto-save]
+gini chat [--auto-save]
 ```
 `--auto-save` flag will save chat history to a randomly generated filename.
 
 ## example chat history
 
 ```bash
-gem chat
+gini chat
 ```
 ```text
 please type prompt below
@@ -67,10 +77,10 @@ Therefore, the average of the given list of numbers is approximately 0.115819069
 
 ## list models
 Following models can be selected when performing a task. Select model by via
-`--model` flag using its name. For example `gem chat --model=models/gemini-pro-vision` etc.
+`--model` flag using its name. For example `gini chat --model=models/gemini-pro-vision` etc.
 
 ```bash
-gem list models
+gini list models
 ```
 ```yaml
 name: models/gemini-pro
@@ -116,4 +126,10 @@ supportedgenerationmethods:
 temperature: 0
 topp: 0
 topk: 0
+```
+## safety
+`--allow-harm-probability` flag is set to `negligible` to prevent output from
+displaying content that could be harmful. Change it at your own risk, for example,
+```bash
+gini chat --allow-harm-probability=medium --auto-save
 ```

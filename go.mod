@@ -1,4 +1,4 @@
-module github.com/kubetrail/gem
+module github.com/kubetrail/gini
 
 go 1.21
 
