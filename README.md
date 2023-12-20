@@ -97,7 +97,7 @@ Below is an example:
 ```bash
 gini analyze image \
   --file seagull-on-a-rock.jpg \
-  --format jpeg \
+  --format image/jpeg \
   could you please detect objects in the provided image
 ```
 ```text

@@ -33,7 +33,7 @@ func init() {
 	f := imageCmd.Flags()
 	f.String(flags.Model, flags.ModelGeminiProVision, "Model name")
 	f.StringSlice(flags.File, nil, "Image filenames")
-	f.StringSlice(flags.Format, nil, "Image formats (assumes jpeg when unspecified)")
+	f.StringSlice(flags.Format, nil, "Image formats (assumes image/jpeg when unspecified)")
 	_ = imageCmd.RegisterFlagCompletionFunc(
 		flags.Model,
 		func(
