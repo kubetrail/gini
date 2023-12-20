@@ -60,6 +60,11 @@ func init() {
 	f := rootCmd.PersistentFlags()
 	f.String(flags.ApiKey, "", fmt.Sprintf("API Key (Env. %s)", flags.ApiKeyEnv))
 	f.Bool(flags.AutoSave, false, "Auto save chat history")
+	f.Float32(flags.TopP, -1, "Model TopP value (-1 means do not configure)")
+	f.Int32(flags.TopK, -1, "Model TopK value (-1 means do not configure)")
+	f.Float32(flags.Temperature, -1, "Model temperature (-1 means do not configure)")
+	f.Int32(flags.CandidateCount, -1, "Model candidate count (-1 means do not configure)")
+	f.Int32(flags.MaxOutputTokens, -1, "Model max output tokens (-1 means do not configure)")
 	f.String(flags.AllowHarmProbability, flags.HarmProbabilityNegligible,
 		fmt.Sprintf(
 			"Harm probability (%s, %s, %s, %s, %s)",

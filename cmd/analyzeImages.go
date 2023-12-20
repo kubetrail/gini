@@ -21,25 +21,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// imagesCmd represents the images command
-var imagesCmd = &cobra.Command{
-	Use:   "images",
+// imageCmd represents the images command
+var imageCmd = &cobra.Command{
+	Use:   "image",
 	Short: "Analyze images",
 	RunE:  run.AnalyzeImages,
 }
 
 func init() {
-	analyzeCmd.AddCommand(imagesCmd)
-	f := imagesCmd.Flags()
+	analyzeCmd.AddCommand(imageCmd)
+	f := imageCmd.Flags()
 	f.String(flags.Model, flags.ModelGeminiProVision, "Model name")
-	f.Float32(flags.TopP, -1, "Model TopP value (-1 means do not configure)")
-	f.Int32(flags.TopK, -1, "Model TopK value (-1 means do not configure)")
-	f.Float32(flags.Temperature, -1, "Model temperature (-1 means do not configure)")
-	f.Int32(flags.CandidateCount, -1, "Model candidate count (-1 means do not configure)")
-	f.Int32(flags.MaxOutputTokens, -1, "Model max output tokens (-1 means do not configure)")
-	f.StringSlice(flags.ImageFiles, nil, "Image filenames (input multiple names using comma or repeated use of the flag)")
-	f.StringSlice(flags.Formats, nil, "Image formats (should be either empty, i.e., assumed jpeg, or of same length as image files)")
-	_ = imagesCmd.RegisterFlagCompletionFunc(
+	f.StringSlice(flags.File, nil, "Image filenames")
+	f.StringSlice(flags.Format, nil, "Image formats (assumes jpeg when unspecified)")
+	_ = imageCmd.RegisterFlagCompletionFunc(
 		flags.Model,
 		func(
 			cmd *cobra.Command,
@@ -58,8 +53,8 @@ func init() {
 		},
 	)
 
-	_ = imagesCmd.RegisterFlagCompletionFunc(
-		flags.Formats,
+	_ = imageCmd.RegisterFlagCompletionFunc(
+		flags.Format,
 		func(
 			cmd *cobra.Command,
 			args []string,
