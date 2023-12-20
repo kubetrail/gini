@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path"
 	"strings"
 	"syscall"
 	"time"
@@ -119,7 +120,14 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("%s file size needs to be less than %d bytes",
 				file, flags.MaxBlobBufferSizeBytes)
 		}
-		parts[i] = genai.ImageData(formats[i], b)
+
+		if path.Base(formats[i]) == formats[i] {
+			formats[i] = "image/" + formats[i]
+		}
+		parts[i] = genai.Blob{
+			MIMEType: formats[i],
+			Data:     b,
+		}
 	}
 
 	var prompt string

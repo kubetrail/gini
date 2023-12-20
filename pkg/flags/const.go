@@ -15,11 +15,11 @@ const (
 )
 
 const (
-	FormatPng  = "png"
-	FormatJpeg = "jpeg"
-	FormatHeic = "heic"
-	FormatHeif = "heif"
-	FormatWebp = "webp"
+	FormatPng  = "image/png"
+	FormatJpeg = "image/jpeg"
+	FormatHeic = "image/heic"
+	FormatHeif = "image/heif"
+	FormatWebp = "image/webp"
 	FormatPdf  = "application/pdf"
 )
 
