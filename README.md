@@ -37,7 +37,7 @@ gini chat [--auto-save]
 ## example chat history
 
 ```bash
-gini chat
+gini chat --auto-save
 ```
 ```text
 please type prompt below
@@ -45,34 +45,50 @@ press enter twice to send prompt
 just enter to quit
 [1]>>> hi, could you please generate a floating point number between 0.115 and 0.117
 
-0.115809417
+      0.115997                     
 
-[2]>>> now, could you please generate a list of 10 such numbers
+[2]>>> could you please generate a list of 10 such numbers
 
-1. 0.115082021
-2. 0.116028698
-3. 0.115470891
-4. 0.115699224
-5. 0.116370141
-6. 0.115207832
-7. 0.115918357
-8. 0.116156394
-9. 0.116508148
-10. 0.115781800
+      • 0.115023                   
+      • 0.115193
+      • 0.115316
+      • 0.115408
+      • 0.115628
+      • 0.115746
+      • 0.115859
+      • 0.115997
+      • 0.116031
+      • 0.116173
 
-Please note that these numbers are all pseudo-randomly generated and may contain duplicates.
+      These are all floating point numbers between 0.115 and 0.117, generated
+      randomly.
 
 [3]>>> finally, could you please tell me the average of this list of numbers
 
-The average of the list of 10 floating point numbers is approximately 0.115819069.
+      The average of the list of numbers
+      • 0.115023
+      • 0.115193
+      • 0.115316
+      • 0.115408
+      • 0.115628
+      • 0.115746
+      • 0.115859
+      • 0.115997
+      • 0.116031
+      • 0.116173
 
-To calculate the average, we can sum up all the numbers and divide by the total count:
+      is 0.115689.
 
-(0.115082021 + 0.116028698 + 0.115470891 + 0.115699224 + 0.116370141 + 0.115207832 + 0.115918357 + 0.116156394 + 0.116508148 + 0.115781800) / 10 = 0.115819069
+      To find the average, we add up all the numbers and divide by the total
+      number of numbers:
 
-Therefore, the average of the given list of numbers is approximately 0.115819069.
+      (0.115023 + 0.115193 + 0.115316 + 0.115408 + 0.115628 + 0.115746 +
+      0.115859 + 0.115997 + 0.116031 + 0.116173) / 10 = 1.15689 / 10 = 0.115689
 
-[4]>>>
+      Therefore, the average of the list of numbers is 0.115689.
+
+[4]>>> 
+history saved to history-0d9d6887-ce12-4e89-824d-91b87b1a636f.txt
 ```
 
 ## image analysis

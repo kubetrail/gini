@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	markdown "github.com/MichaelMure/go-term-markdown"
 	"github.com/google/generative-ai-go/genai"
 	"github.com/google/uuid"
 	"github.com/kubetrail/gini/pkg/flags"
@@ -199,11 +200,20 @@ func printResponse(resp *genai.GenerateContentResponse, w io.Writer, autoSave bo
 			return fmt.Errorf("failed to write to history file: %w", err)
 		}
 	}
+	var result []byte
 	for _, cand := range resp.Candidates {
 		if cand.Content != nil {
 			for _, part := range cand.Content.Parts {
-				if _, err := fmt.Fprintln(w, part); err != nil {
-					return fmt.Errorf("failed to write to output: %w", err)
+				text, ok := part.(genai.Text)
+				if ok {
+					result = markdown.Render(string(text), 80, 6)
+					if _, err := fmt.Fprintln(w, string(result)); err != nil {
+						return fmt.Errorf("failed to write to output: %w", err)
+					}
+				} else {
+					if _, err := fmt.Fprintln(w, part); err != nil {
+						return fmt.Errorf("failed to write to output: %w", err)
+					}
 				}
 				if autoSave {
 					if _, err := fileWriter.WriteString(fmt.Sprintf("%s\n", part)); err != nil {
