@@ -17,7 +17,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-func AnalyzeImages(cmd *cobra.Command, args []string) error {
+func AnalyzePdfs(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -32,7 +32,6 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
 	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
 	_ = viper.BindPFlag(flags.File, cmd.Flag(flags.File))
-	_ = viper.BindPFlag(flags.Format, cmd.Flag(flags.Format))
 	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
 
 	apiKey := viper.GetString(flags.ApiKey)
@@ -45,7 +44,6 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	autoSave := viper.GetBool(flags.AutoSave)
 	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
 	files := viper.GetStringSlice(flags.File)
-	formats := viper.GetStringSlice(flags.Format)
 
 	if len(apiKey) == 0 || len(modelName) == 0 {
 		return fmt.Errorf("api-key or model cannot be empty")
@@ -96,30 +94,24 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	}
 
 	parts := make([]genai.Part, len(files)+1)
-	if formats == nil {
-		formats = make([]string, len(files))
-		for i := range formats {
-			formats[i] = flags.FormatJpeg
-		}
-	} else {
-		if len(formats) > len(files) {
-			return fmt.Errorf("cannot provide more formats than number of images")
-		}
-		for i := len(formats); i < len(files); i++ {
-			formats = append(formats, flags.FormatJpeg)
-		}
+	formats := make([]string, len(files))
+	for i := range formats {
+		formats[i] = flags.FormatPdf
 	}
 
 	for i, file := range files {
 		b, err := os.ReadFile(file)
 		if err != nil {
-			return fmt.Errorf("failed to read image file: %w", err)
+			return fmt.Errorf("failed to read pdf file: %w", err)
 		}
 		if len(b) > flags.MaxBlobBufferSizeBytes {
 			return fmt.Errorf("%s file size needs to be less than %d bytes",
 				file, flags.MaxBlobBufferSizeBytes)
 		}
-		parts[i] = genai.ImageData(formats[i], b)
+		parts[i] = genai.Blob{
+			MIMEType: formats[i],
+			Data:     b,
+		}
 	}
 
 	var prompt string

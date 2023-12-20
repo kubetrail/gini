@@ -10,8 +10,8 @@ const (
 	Temperature          = "temperature"
 	CandidateCount       = "candidate-count"
 	MaxOutputTokens      = "max-output-tokens"
-	ImageFiles           = "image-files"
-	Formats              = "formats"
+	File                 = "file"
+	Format               = "format"
 )
 
 const (
@@ -20,6 +20,11 @@ const (
 	FormatHeic = "heic"
 	FormatHeif = "heif"
 	FormatWebp = "webp"
+	FormatPdf  = "application/pdf"
+)
+
+const (
+	MaxBlobBufferSizeBytes = 4194304
 )
 
 const (

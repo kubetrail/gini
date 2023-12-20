@@ -95,9 +95,9 @@ history saved to history-0d9d6887-ce12-4e89-824d-91b87b1a636f.txt
 Images can be analyzed using a combination of raw image data and associated text prompt.
 Below is an example:
 ```bash
-gini analyze images \
-  --image-files seagull-on-a-rock.jpg \
-  --formats jpeg \
+gini analyze image \
+  --file seagull-on-a-rock.jpg \
+  --format jpeg \
   could you please detect objects in the provided image
 ```
 ```text
