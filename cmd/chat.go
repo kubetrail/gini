@@ -25,7 +25,21 @@ import (
 var chatCmd = &cobra.Command{
 	Use:   "chat",
 	Short: "Start chat",
-	RunE:  run.Chat,
+	Long: `
+Start an interactive chat with Google Gemini model using this command.
+
+Hit enter twice to send your prompt.
+
+Alternatively, if you have blank lines in your text prompt then
+enclose your prompt within {{ and }} as shown below
+{{
+This is a prompt with blank lines
+
+
+The prompt ends here
+}}
+`,
+	RunE: run.Chat,
 }
 
 func init() {
