@@ -4,6 +4,7 @@ const (
 	ApiKey               = "api-key"
 	Model                = "model"
 	AutoSave             = "auto-save"
+	Render               = "render"
 	AllowHarmProbability = "allow-harm-probability"
 	TopK                 = "top-k"
 	TopP                 = "top-p"
@@ -12,6 +13,12 @@ const (
 	MaxOutputTokens      = "max-output-tokens"
 	File                 = "file"
 	Format               = "format"
+)
+
+const (
+	RenderFormatHtml     = "html"
+	RenderFormatMarkdown = "markdown"
+	RenderFormatPretty   = "pretty"
 )
 
 const (
