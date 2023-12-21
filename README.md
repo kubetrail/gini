@@ -91,6 +91,52 @@ just enter to quit
 history saved to history-0d9d6887-ce12-4e89-824d-91b87b1a636f.txt
 ```
 
+The prompt detects a blank line as termination, therefore, in order to send a prompt
+that has blank lines in it, start the prompt with double curly braces `{{` and end
+with `}}` as shown below.
+```text
+gini chat 
+please type prompt below and press enter twice to send it
+see more info in gini chat --help
+just enter to quit
+[1]>>> {{
+hi, can you explain to me this code below
+
+package main
+
+func main() {
+  fmt.Println("hello world")
+}
+
+}}
+      The code below is a simple "Hello, world!" program written in Go. It
+      prints the string "hello world" to the standard output.
+
+      ┃ package main
+      ┃ 
+      ┃ import "fmt"
+      ┃ 
+      ┃ func main() {
+      ┃     fmt.Println("hello world")
+      ┃ }
+
+      Here's a breakdown of the code:
+      • package main: This line declares the package name for the program. The
+        main package is the entry point for the program.
+      • import "fmt": This line imports the fmt package, which provides
+        functions for formatted I/O.
+      • func main() { ... }: This is the main function of the program. It's the
+        entry point for the program, and it's where the program execution
+        begins.
+      • fmt.Println("hello world"): This line prints the string "hello world" to
+        the standard output (usually the console or terminal window where the
+        program is running).
+
+      When you run the program, you should see the output:
+
+      ┃ hello world
+```
+
 ## image analysis
 Images can be analyzed using a combination of raw image data and associated text prompt.
 Below is an example:

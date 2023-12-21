@@ -102,7 +102,9 @@ func Chat(cmd *cobra.Command, args []string) error {
 		return res, nil
 	}
 
-	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "please type prompt below\npress enter twice to send prompt\njust enter to quit\n")
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "please type prompt below and press enter twice to send it\n")
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "see more info: gini chat --help\n")
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "hit enter with no prompt to quit\n")
 
 OuterLoop:
 	for i := 0; ; i++ {
@@ -110,6 +112,7 @@ OuterLoop:
 
 		scanner := bufio.NewScanner(os.Stdin)
 		var lines []string
+		var hold bool
 	InnerLoop:
 		for {
 			scanner.Scan()
@@ -119,7 +122,14 @@ OuterLoop:
 			case <-ctx.Done():
 				break InnerLoop
 			default:
-				if len(line) == 0 {
+				if len(line) == 0 && !hold {
+					break InnerLoop
+				}
+				if strings.TrimSpace(line) == startHold {
+					hold = true
+					continue InnerLoop
+				}
+				if strings.TrimSpace(line) == endHold && hold {
 					break InnerLoop
 				}
 				lines = append(lines, line)

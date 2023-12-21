@@ -140,6 +140,7 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 
 		scanner := bufio.NewScanner(os.Stdin)
 		var lines []string
+		var hold bool
 	InnerLoop:
 		for {
 			scanner.Scan()
@@ -149,7 +150,14 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 			case <-ctx.Done():
 				break InnerLoop
 			default:
-				if len(line) == 0 {
+				if len(line) == 0 && !hold {
+					break InnerLoop
+				}
+				if strings.TrimSpace(line) == startHold {
+					hold = true
+					continue InnerLoop
+				}
+				if strings.TrimSpace(line) == endHold && hold {
 					break InnerLoop
 				}
 				lines = append(lines, line)

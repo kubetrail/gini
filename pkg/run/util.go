@@ -13,6 +13,11 @@ import (
 	"github.com/kubetrail/gini/pkg/flags"
 )
 
+const (
+	startHold = "{{"
+	endHold   = "}}"
+)
+
 func mdToHTML(md []byte) []byte {
 	// create markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
