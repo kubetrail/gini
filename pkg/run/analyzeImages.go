@@ -31,6 +31,7 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	_ = viper.BindPFlag(flags.CandidateCount, cmd.Flag(flags.CandidateCount))
 	_ = viper.BindPFlag(flags.MaxOutputTokens, cmd.Flag(flags.MaxOutputTokens))
 	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
+	_ = viper.BindPFlag(flags.Render, cmd.Flag(flags.Render))
 	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
 	_ = viper.BindPFlag(flags.File, cmd.Flag(flags.File))
 	_ = viper.BindPFlag(flags.Format, cmd.Flag(flags.Format))
@@ -44,6 +45,7 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	candidateCount := viper.GetInt32(flags.CandidateCount)
 	maxOutputTokens := viper.GetInt32(flags.MaxOutputTokens)
 	autoSave := viper.GetBool(flags.AutoSave)
+	render := viper.GetString(flags.Render)
 	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
 	files := viper.GetStringSlice(flags.File)
 	formats := viper.GetStringSlice(flags.Format)
@@ -175,7 +177,7 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 		return res, nil
 	}
 
-	s := "... sending prompt... please wait"
+	s := "...sending prompt... please wait"
 	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", s)
 	res, err := send(prompt)
 	if err != nil {
@@ -205,7 +207,7 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if err := printResponse(res, cmd.OutOrStdout(), autoSave, fileWriter); err != nil {
+	if err := printResponse(res, cmd.OutOrStdout(), render, autoSave, fileWriter); err != nil {
 		return fmt.Errorf("failed to write response: %w", err)
 	}
 

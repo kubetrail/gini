@@ -3,14 +3,12 @@ package run
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
 
-	markdown "github.com/MichaelMure/go-term-markdown"
 	"github.com/google/generative-ai-go/genai"
 	"github.com/google/uuid"
 	"github.com/kubetrail/gini/pkg/flags"
@@ -32,6 +30,7 @@ func Chat(cmd *cobra.Command, args []string) error {
 	_ = viper.BindPFlag(flags.CandidateCount, cmd.Flag(flags.CandidateCount))
 	_ = viper.BindPFlag(flags.MaxOutputTokens, cmd.Flag(flags.MaxOutputTokens))
 	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
+	_ = viper.BindPFlag(flags.Render, cmd.Flag(flags.Render))
 	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
 	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
 
@@ -43,6 +42,7 @@ func Chat(cmd *cobra.Command, args []string) error {
 	candidateCount := viper.GetInt32(flags.CandidateCount)
 	maxOutputTokens := viper.GetInt32(flags.MaxOutputTokens)
 	autoSave := viper.GetBool(flags.AutoSave)
+	render := viper.GetString(flags.Render)
 	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
 
 	if len(apiKey) == 0 || len(modelName) == 0 {
@@ -138,7 +138,7 @@ OuterLoop:
 		case <-ctx.Done():
 			break OuterLoop
 		default:
-			s := "... sending prompt... please wait"
+			s := "...sending prompt... please wait"
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", s)
 			prompt := strings.Join(lines, "\n")
 			res, err := send(prompt)
@@ -175,7 +175,7 @@ OuterLoop:
 				}
 			}
 
-			if err := printResponse(res, cmd.OutOrStdout(), autoSave, fileWriter); err != nil {
+			if err := printResponse(res, cmd.OutOrStdout(), render, autoSave, fileWriter); err != nil {
 				return fmt.Errorf("failed to write response: %w", err)
 			}
 		}
@@ -188,39 +188,6 @@ OuterLoop:
 
 		if _, err := fmt.Fprintln(cmd.OutOrStdout(), fmt.Sprintf("history saved to %s", fileName)); err != nil {
 			return fmt.Errorf("failed to write to output: %w", err)
-		}
-	}
-
-	return nil
-}
-
-func printResponse(resp *genai.GenerateContentResponse, w io.Writer, autoSave bool, fileWriter *bufio.Writer) error {
-	if autoSave {
-		if _, err := fileWriter.WriteString(fmt.Sprintf("%s\n", "[response]>>>")); err != nil {
-			return fmt.Errorf("failed to write to history file: %w", err)
-		}
-	}
-	var result []byte
-	for _, cand := range resp.Candidates {
-		if cand.Content != nil {
-			for _, part := range cand.Content.Parts {
-				text, ok := part.(genai.Text)
-				if ok {
-					result = markdown.Render(string(text), 80, 6)
-					if _, err := fmt.Fprintln(w, string(result)); err != nil {
-						return fmt.Errorf("failed to write to output: %w", err)
-					}
-				} else {
-					if _, err := fmt.Fprintln(w, part); err != nil {
-						return fmt.Errorf("failed to write to output: %w", err)
-					}
-				}
-				if autoSave {
-					if _, err := fileWriter.WriteString(fmt.Sprintf("%s\n", part)); err != nil {
-						return fmt.Errorf("failed to write to history file: %w", err)
-					}
-				}
-			}
 		}
 	}
 

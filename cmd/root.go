@@ -60,6 +60,7 @@ func init() {
 	f := rootCmd.PersistentFlags()
 	f.String(flags.ApiKey, "", fmt.Sprintf("API Key (Env. %s)", flags.ApiKeyEnv))
 	f.Bool(flags.AutoSave, false, "Auto save chat history")
+	f.String(flags.Render, flags.RenderFormatPretty, "Render format for auto-saved file")
 	f.Float32(flags.TopP, -1, "Model TopP value (-1 means do not configure)")
 	f.Int32(flags.TopK, -1, "Model TopK value (-1 means do not configure)")
 	f.Float32(flags.Temperature, -1, "Model temperature (-1 means do not configure)")
@@ -92,6 +93,25 @@ func init() {
 					flags.HarmProbabilityLow,
 					flags.HarmProbabilityMedium,
 					flags.HarmProbabilityHigh,
+				},
+				cobra.ShellCompDirectiveDefault
+		},
+	)
+
+	_ = rootCmd.RegisterFlagCompletionFunc(
+		flags.Render,
+		func(
+			cmd *cobra.Command,
+			args []string,
+			toComplete string,
+		) (
+			[]string,
+			cobra.ShellCompDirective,
+		) {
+			return []string{
+					flags.RenderFormatPretty,
+					flags.RenderFormatHtml,
+					flags.RenderFormatMarkdown,
 				},
 				cobra.ShellCompDirectiveDefault
 		},
