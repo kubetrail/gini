@@ -172,9 +172,11 @@ OuterLoop:
 					return fmt.Errorf("invalid harm probability:%s", allowHarmProbability)
 				}
 
-				for _, rating := range res.PromptFeedback.SafetyRatings {
-					if rating.Probability > harmProbability {
-						return fmt.Errorf("output harm probability threshold crossed")
+				if res != nil && res.PromptFeedback != nil {
+					for _, rating := range res.PromptFeedback.SafetyRatings {
+						if rating.Probability > harmProbability {
+							return fmt.Errorf("output harm probability threshold crossed")
+						}
 					}
 				}
 			}
