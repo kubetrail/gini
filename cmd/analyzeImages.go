@@ -31,7 +31,7 @@ var imageCmd = &cobra.Command{
 func init() {
 	analyzeCmd.AddCommand(imageCmd)
 	f := imageCmd.Flags()
-	f.String(flags.Model, flags.ModelGemini1dot0ProVisionLatest, "Model name")
+	f.String(flags.Model, flags.M07, "Model name")
 	f.StringSlice(flags.File, nil, "Image filenames")
 	f.StringSlice(flags.Format, nil, "Image formats (assumes image/jpeg when unspecified)")
 	_ = imageCmd.RegisterFlagCompletionFunc(
@@ -44,12 +44,7 @@ func init() {
 			[]string,
 			cobra.ShellCompDirective,
 		) {
-			return []string{
-					flags.ModelGeminiPro,
-					flags.ModelGeminiProVision,
-					flags.ModelEmbedding001,
-				},
-				cobra.ShellCompDirectiveDefault
+			return flags.Models, cobra.ShellCompDirectiveDefault
 		},
 	)
 

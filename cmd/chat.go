@@ -45,7 +45,7 @@ The prompt ends here
 func init() {
 	rootCmd.AddCommand(chatCmd)
 	f := chatCmd.Flags()
-	f.String(flags.Model, flags.ModelGemini1dot0ProLatest, "Model name")
+	f.String(flags.Model, flags.M09, "Model name")
 	f.Float32(flags.TopP, -1, "Model TopP value (-1 means do not configure)")
 	f.Int32(flags.TopK, -1, "Model TopK value (-1 means do not configure)")
 	f.Float32(flags.Temperature, -1, "Model temperature (-1 means do not configure)")
@@ -61,16 +61,7 @@ func init() {
 			[]string,
 			cobra.ShellCompDirective,
 		) {
-			return []string{
-					flags.ModelGeminiPro,
-					flags.ModelGeminiProVision,
-					flags.ModelEmbedding001,
-					flags.ModelGemini1dot0Pro,
-					flags.ModelGemini1dot0Pro001,
-					flags.ModelGemini1dot0ProLatest,
-					flags.ModelGemini1dot0ProVisionLatest,
-				},
-				cobra.ShellCompDirectiveDefault
+			return flags.Models, cobra.ShellCompDirectiveDefault
 		},
 	)
 }
