@@ -76,6 +76,10 @@ func init() {
 					flags.FormatPdf,
 					flags.FormatText,
 					flags.FormatJpeg,
+					flags.FormatPng,
+					flags.FormatHeif,
+					flags.FormatHeic,
+					flags.FormatWebp,
 				},
 				cobra.ShellCompDirectiveDefault
 		},
