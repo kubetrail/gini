@@ -28,6 +28,7 @@ const (
 	FormatHeif = "image/heif"
 	FormatWebp = "image/webp"
 	FormatPdf  = "application/pdf"
+	FormatText = "text/plain"
 )
 
 const (

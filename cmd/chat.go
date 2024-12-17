@@ -46,11 +46,8 @@ func init() {
 	rootCmd.AddCommand(chatCmd)
 	f := chatCmd.Flags()
 	f.String(flags.Model, flags.M09, "Model name")
-	f.Float32(flags.TopP, -1, "Model TopP value (-1 means do not configure)")
-	f.Int32(flags.TopK, -1, "Model TopK value (-1 means do not configure)")
-	f.Float32(flags.Temperature, -1, "Model temperature (-1 means do not configure)")
-	f.Int32(flags.CandidateCount, -1, "Model candidate count (-1 means do not configure)")
-	f.Int32(flags.MaxOutputTokens, -1, "Model max output tokens (-1 means do not configure)")
+	f.StringSlice(flags.File, nil, "Image filenames")
+	f.StringSlice(flags.Format, nil, "Image formats (assumes application/pdf when unspecified)")
 	_ = chatCmd.RegisterFlagCompletionFunc(
 		flags.Model,
 		func(
@@ -62,6 +59,25 @@ func init() {
 			cobra.ShellCompDirective,
 		) {
 			return flags.Models, cobra.ShellCompDirectiveDefault
+		},
+	)
+
+	_ = chatCmd.RegisterFlagCompletionFunc(
+		flags.Format,
+		func(
+			cmd *cobra.Command,
+			args []string,
+			toComplete string,
+		) (
+			[]string,
+			cobra.ShellCompDirective,
+		) {
+			return []string{
+					flags.FormatPdf,
+					flags.FormatText,
+					flags.FormatJpeg,
+				},
+				cobra.ShellCompDirectiveDefault
 		},
 	)
 }

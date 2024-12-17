@@ -11,6 +11,8 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 	"github.com/google/generative-ai-go/genai"
 	"github.com/kubetrail/gini/pkg/flags"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -19,7 +21,7 @@ const (
 )
 
 func mdToHTML(md []byte) []byte {
-	// create markdown parser with extensions
+	// create Markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
 	p := parser.NewWithExtensions(extensions)
 	doc := p.Parse(md)
@@ -91,4 +93,54 @@ func printResponse(resp *genai.GenerateContentResponse, w io.Writer, render stri
 	}
 
 	return nil
+}
+
+type persistentFlagValues struct {
+	ApiKey               string
+	TopP                 float32
+	TopK                 int32
+	Temperature          float32
+	CandidateCount       int32
+	MaxOutputTokens      int32
+	AutoSave             bool
+	Render               string
+	AllowHarmProbability string
+}
+
+func getPersistentFlags(cmd *cobra.Command) persistentFlagValues {
+	pFlags := cmd.Root().PersistentFlags()
+
+	_ = viper.BindPFlag(flags.ApiKey, pFlags.Lookup(flags.ApiKey))
+	_ = viper.BindPFlag(flags.TopP, pFlags.Lookup(flags.TopP))
+	_ = viper.BindPFlag(flags.TopK, pFlags.Lookup(flags.TopK))
+	_ = viper.BindPFlag(flags.Temperature, pFlags.Lookup(flags.Temperature))
+	_ = viper.BindPFlag(flags.CandidateCount, pFlags.Lookup(flags.CandidateCount))
+	_ = viper.BindPFlag(flags.MaxOutputTokens, pFlags.Lookup(flags.MaxOutputTokens))
+	_ = viper.BindPFlag(flags.AutoSave, pFlags.Lookup(flags.AutoSave))
+	_ = viper.BindPFlag(flags.Render, pFlags.Lookup(flags.Render))
+	_ = viper.BindPFlag(flags.AllowHarmProbability, pFlags.Lookup(flags.AllowHarmProbability))
+
+	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
+
+	apiKey := viper.GetString(flags.ApiKey)
+	topP := float32(viper.GetFloat64(flags.TopP))
+	topK := viper.GetInt32(flags.TopK)
+	temperature := float32(viper.GetFloat64(flags.Temperature))
+	candidateCount := viper.GetInt32(flags.CandidateCount)
+	maxOutputTokens := viper.GetInt32(flags.MaxOutputTokens)
+	autoSave := viper.GetBool(flags.AutoSave)
+	render := viper.GetString(flags.Render)
+	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
+
+	return persistentFlagValues{
+		ApiKey:               apiKey,
+		TopP:                 topP,
+		TopK:                 topK,
+		Temperature:          temperature,
+		CandidateCount:       candidateCount,
+		MaxOutputTokens:      maxOutputTokens,
+		AutoSave:             autoSave,
+		Render:               render,
+		AllowHarmProbability: allowHarmProbability,
+	}
 }
