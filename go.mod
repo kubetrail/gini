@@ -1,8 +1,6 @@
 module github.com/kubetrail/gini
 
-go 1.22.7
-
-toolchain go1.23.3
+go 1.23
 
 require (
 	github.com/MichaelMure/go-term-markdown v0.1.4
