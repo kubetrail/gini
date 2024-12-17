@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -22,36 +23,22 @@ func Chat(cmd *cobra.Command, args []string) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	_ = viper.BindPFlag(flags.ApiKey, cmd.Flag(flags.ApiKey))
+	pFlags := getPersistentFlags(cmd)
 	_ = viper.BindPFlag(flags.Model, cmd.Flag(flags.Model))
-	_ = viper.BindPFlag(flags.TopP, cmd.Flag(flags.TopP))
-	_ = viper.BindPFlag(flags.TopK, cmd.Flag(flags.TopK))
-	_ = viper.BindPFlag(flags.Temperature, cmd.Flag(flags.Temperature))
-	_ = viper.BindPFlag(flags.CandidateCount, cmd.Flag(flags.CandidateCount))
-	_ = viper.BindPFlag(flags.MaxOutputTokens, cmd.Flag(flags.MaxOutputTokens))
-	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
-	_ = viper.BindPFlag(flags.Render, cmd.Flag(flags.Render))
-	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
-	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
+	_ = viper.BindPFlag(flags.File, cmd.Flag(flags.File))
+	_ = viper.BindPFlag(flags.Format, cmd.Flag(flags.Format))
 
-	apiKey := viper.GetString(flags.ApiKey)
 	modelName := viper.GetString(flags.Model)
-	topP := float32(viper.GetFloat64(flags.TopP))
-	topK := viper.GetInt32(flags.TopK)
-	temperature := float32(viper.GetFloat64(flags.Temperature))
-	candidateCount := viper.GetInt32(flags.CandidateCount)
-	maxOutputTokens := viper.GetInt32(flags.MaxOutputTokens)
-	autoSave := viper.GetBool(flags.AutoSave)
-	render := viper.GetString(flags.Render)
-	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
+	files := viper.GetStringSlice(flags.File)
+	formats := viper.GetStringSlice(flags.Format)
 
-	if len(apiKey) == 0 || len(modelName) == 0 {
+	if len(pFlags.ApiKey) == 0 || len(modelName) == 0 {
 		return fmt.Errorf("api-key or model cannot be empty")
 	}
 
 	fileName := fmt.Sprintf("history-%s.txt", uuid.New().String())
 	var fileWriter *bufio.Writer
-	if autoSave {
+	if pFlags.AutoSave {
 		f, err := os.Create(fileName)
 		if err != nil {
 			return fmt.Errorf("failed to create history file: %w", err)
@@ -70,32 +57,80 @@ func Chat(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	if formats == nil {
+		formats = make([]string, len(files))
+		for i := range formats {
+			formats[i] = flags.FormatPdf
+		}
+	} else {
+		if len(formats) > len(files) {
+			return fmt.Errorf("cannot provide more formats than number of files")
+		}
+		for i := len(formats); i < len(files); i++ {
+			formats = append(formats, flags.FormatPdf)
+		}
+	}
+
+	client, err := genai.NewClient(ctx, option.WithAPIKey(pFlags.ApiKey))
 	if err != nil {
 		return fmt.Errorf("failed to create new genai client: %w", err)
 	}
 	defer client.Close()
 
+	uris := make([]string, len(files))
+	if len(files) > 0 {
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "uploading files...")
+	}
+	for i, file := range files {
+		f, err := client.UploadFileFromPath(ctx, file, &genai.UploadFileOptions{
+			DisplayName: filepath.Base(file),
+			MIMEType:    formats[i],
+		})
+		if err != nil {
+			return fmt.Errorf("failed to upload file %s: %w", file, err)
+		}
+
+		uris[i] = f.URI
+
+		defer func() {
+			err := client.DeleteFile(ctx, f.Name)
+			if err != nil {
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "failed to delete file %s...\n", f.Name)
+			}
+		}()
+	}
+	if len(files) > 0 {
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "done!\n")
+		defer func() {
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "deleting uploaded files...\n")
+		}()
+	}
+
 	model := client.GenerativeModel(modelName)
-	if topP >= 0 {
-		model.SetTopP(topP)
+	if pFlags.TopP >= 0 {
+		model.SetTopP(pFlags.TopP)
 	}
-	if topK >= 0 {
-		model.SetTopK(topK)
+	if pFlags.TopK >= 0 {
+		model.SetTopK(pFlags.TopK)
 	}
-	if temperature >= 0 {
-		model.SetTemperature(temperature)
+	if pFlags.Temperature >= 0 {
+		model.SetTemperature(pFlags.Temperature)
 	}
-	if candidateCount >= 0 {
-		model.SetCandidateCount(candidateCount)
+	if pFlags.CandidateCount >= 0 {
+		model.SetCandidateCount(pFlags.CandidateCount)
 	}
-	if maxOutputTokens >= 0 {
-		model.SetMaxOutputTokens(maxOutputTokens)
+	if pFlags.MaxOutputTokens >= 0 {
+		model.SetMaxOutputTokens(pFlags.MaxOutputTokens)
 	}
 	cs := model.StartChat()
 
-	send := func(msg string) (*genai.GenerateContentResponse, error) {
-		res, err := cs.SendMessage(ctx, genai.Text(msg))
+	sendMessage := func(msg string) (*genai.GenerateContentResponse, error) {
+		parts := make([]genai.Part, len(files)+1)
+		parts[0] = genai.Text(msg)
+		for i, uri := range uris {
+			parts[i+1] = genai.FileData{URI: uri}
+		}
+		res, err := cs.SendMessage(ctx, parts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to send message: %w", err)
 		}
@@ -151,15 +186,15 @@ OuterLoop:
 			s := "...sending prompt... please wait"
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", s)
 			prompt := strings.Join(lines, "\n")
-			res, err := send(prompt)
+			res, err := sendMessage(prompt)
 			if err != nil {
 				return err
 			}
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", strings.Repeat(" ", len(s)+2))
 
-			if allowHarmProbability != flags.HarmProbabilityUnspecified {
+			if pFlags.AllowHarmProbability != flags.HarmProbabilityUnspecified {
 				var harmProbability genai.HarmProbability
-				switch allowHarmProbability {
+				switch pFlags.AllowHarmProbability {
 				case flags.HarmProbabilityNegligible:
 					harmProbability = genai.HarmProbabilityNegligible
 				case flags.HarmProbabilityLow:
@@ -169,7 +204,7 @@ OuterLoop:
 				case flags.HarmProbabilityHigh:
 					harmProbability = genai.HarmProbabilityHigh
 				default:
-					return fmt.Errorf("invalid harm probability:%s", allowHarmProbability)
+					return fmt.Errorf("invalid harm probability:%s", pFlags.AllowHarmProbability)
 				}
 
 				if res != nil && res.PromptFeedback != nil {
@@ -181,19 +216,19 @@ OuterLoop:
 				}
 			}
 
-			if autoSave {
+			if pFlags.AutoSave {
 				if _, err := fileWriter.WriteString(fmt.Sprintf("[%d]>>> %s\n", i+1, prompt)); err != nil {
 					return fmt.Errorf("failed to write to history file: %w", err)
 				}
 			}
 
-			if err := printResponse(res, cmd.OutOrStdout(), render, autoSave, fileWriter); err != nil {
+			if err := printResponse(res, cmd.OutOrStdout(), pFlags.Render, pFlags.AutoSave, fileWriter); err != nil {
 				return fmt.Errorf("failed to write response: %w", err)
 			}
 		}
 	}
 
-	if autoSave {
+	if pFlags.AutoSave {
 		if err := fileWriter.Flush(); err != nil {
 			return fmt.Errorf("failed to write to history file: %w", err)
 		}

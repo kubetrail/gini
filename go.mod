@@ -1,13 +1,11 @@
 module github.com/kubetrail/gini
 
-go 1.22.7
-
-toolchain go1.23.3
+go 1.23
 
 require (
 	github.com/MichaelMure/go-term-markdown v0.1.4
-	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
-	github.com/google/generative-ai-go v0.18.0
+	github.com/gomarkdown/markdown v0.0.0-20241205020045-f7e15b2f3e62
+	github.com/google/generative-ai-go v0.19.0
 	github.com/google/uuid v1.6.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0

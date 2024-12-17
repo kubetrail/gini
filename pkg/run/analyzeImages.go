@@ -23,40 +23,23 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	_ = viper.BindPFlag(flags.ApiKey, cmd.Flag(flags.ApiKey))
 	_ = viper.BindPFlag(flags.Model, cmd.Flag(flags.Model))
-	_ = viper.BindPFlag(flags.TopP, cmd.Flag(flags.TopP))
-	_ = viper.BindPFlag(flags.TopK, cmd.Flag(flags.TopK))
-	_ = viper.BindPFlag(flags.Temperature, cmd.Flag(flags.Temperature))
-	_ = viper.BindPFlag(flags.CandidateCount, cmd.Flag(flags.CandidateCount))
-	_ = viper.BindPFlag(flags.MaxOutputTokens, cmd.Flag(flags.MaxOutputTokens))
-	_ = viper.BindPFlag(flags.AutoSave, cmd.Flag(flags.AutoSave))
-	_ = viper.BindPFlag(flags.Render, cmd.Flag(flags.Render))
-	_ = viper.BindPFlag(flags.AllowHarmProbability, cmd.Flag(flags.AllowHarmProbability))
 	_ = viper.BindPFlag(flags.File, cmd.Flag(flags.File))
 	_ = viper.BindPFlag(flags.Format, cmd.Flag(flags.Format))
-	_ = viper.BindEnv(flags.ApiKey, flags.ApiKeyEnv)
 
-	apiKey := viper.GetString(flags.ApiKey)
+	pFlags := getPersistentFlags(cmd)
+
 	modelName := viper.GetString(flags.Model)
-	topP := float32(viper.GetFloat64(flags.TopP))
-	topK := viper.GetInt32(flags.TopK)
-	temperature := float32(viper.GetFloat64(flags.Temperature))
-	candidateCount := viper.GetInt32(flags.CandidateCount)
-	maxOutputTokens := viper.GetInt32(flags.MaxOutputTokens)
-	autoSave := viper.GetBool(flags.AutoSave)
-	render := viper.GetString(flags.Render)
-	allowHarmProbability := viper.GetString(flags.AllowHarmProbability)
 	files := viper.GetStringSlice(flags.File)
 	formats := viper.GetStringSlice(flags.Format)
 
-	if len(apiKey) == 0 || len(modelName) == 0 {
+	if len(pFlags.ApiKey) == 0 || len(modelName) == 0 {
 		return fmt.Errorf("api-key or model cannot be empty")
 	}
 
 	fileName := fmt.Sprintf("history-%s.txt", uuid.New().String())
 	var fileWriter *bufio.Writer
-	if autoSave {
+	if pFlags.AutoSave {
 		f, err := os.Create(fileName)
 		if err != nil {
 			return fmt.Errorf("failed to create history file: %w", err)
@@ -75,27 +58,27 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(pFlags.ApiKey))
 	if err != nil {
 		return fmt.Errorf("failed to create new genai client: %w", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	if topP >= 0 {
-		model.SetTopP(topP)
+	if pFlags.TopP >= 0 {
+		model.SetTopP(pFlags.TopP)
 	}
-	if topK >= 0 {
-		model.SetTopK(topK)
+	if pFlags.TopK >= 0 {
+		model.SetTopK(pFlags.TopK)
 	}
-	if temperature >= 0 {
-		model.SetTemperature(temperature)
+	if pFlags.Temperature >= 0 {
+		model.SetTemperature(pFlags.Temperature)
 	}
-	if candidateCount >= 0 {
-		model.SetCandidateCount(candidateCount)
+	if pFlags.CandidateCount >= 0 {
+		model.SetCandidateCount(pFlags.CandidateCount)
 	}
-	if maxOutputTokens >= 0 {
-		model.SetMaxOutputTokens(maxOutputTokens)
+	if pFlags.MaxOutputTokens >= 0 {
+		model.SetMaxOutputTokens(pFlags.MaxOutputTokens)
 	}
 
 	parts := make([]genai.Part, len(files)+1)
@@ -193,9 +176,9 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 	}
 	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", strings.Repeat(" ", len(s)+2))
 
-	if allowHarmProbability != flags.HarmProbabilityUnspecified {
+	if pFlags.AllowHarmProbability != flags.HarmProbabilityUnspecified {
 		var harmProbability genai.HarmProbability
-		switch allowHarmProbability {
+		switch pFlags.AllowHarmProbability {
 		case flags.HarmProbabilityNegligible:
 			harmProbability = genai.HarmProbabilityNegligible
 		case flags.HarmProbabilityLow:
@@ -205,7 +188,7 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 		case flags.HarmProbabilityHigh:
 			harmProbability = genai.HarmProbabilityHigh
 		default:
-			return fmt.Errorf("invalid harm probability:%s", allowHarmProbability)
+			return fmt.Errorf("invalid harm probability:%s", pFlags.AllowHarmProbability)
 		}
 
 		if res != nil && res.PromptFeedback != nil {
@@ -217,11 +200,11 @@ func AnalyzeImages(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if err := printResponse(res, cmd.OutOrStdout(), render, autoSave, fileWriter); err != nil {
+	if err := printResponse(res, cmd.OutOrStdout(), pFlags.Render, pFlags.AutoSave, fileWriter); err != nil {
 		return fmt.Errorf("failed to write response: %w", err)
 	}
 
-	if autoSave {
+	if pFlags.AutoSave {
 		if err := fileWriter.Flush(); err != nil {
 			return fmt.Errorf("failed to write to history file: %w", err)
 		}
