@@ -40,69 +40,68 @@ const (
 )
 
 const (
-	M00 = "models/chat-bison-001"
-	M01 = "models/text-bison-001"
-	M02 = "models/embedding-gecko-001"
-	M03 = "models/gemini-1.0-pro-latest"
-	M04 = "models/gemini-1.0-pro"
-	M05 = "models/gemini-pro"
-	M06 = "models/gemini-1.0-pro-001"
-	M07 = "models/gemini-1.0-pro-vision-latest"
-	M08 = "models/gemini-pro-vision"
-	M09 = "models/gemini-1.5-pro-latest"
-	M10 = "models/gemini-1.5-pro-001"
-	M11 = "models/gemini-1.5-pro-002"
-	M12 = "models/gemini-1.5-pro"
-	M13 = "models/gemini-1.5-pro-exp-0801"
-	M14 = "models/gemini-1.5-pro-exp-0827"
-	M15 = "models/gemini-1.5-flash-latest"
-	M16 = "models/gemini-1.5-flash-001"
-	M17 = "models/gemini-1.5-flash-001-tuning"
-	M18 = "models/gemini-1.5-flash"
-	M19 = "models/gemini-1.5-flash-exp-0827"
-	M20 = "models/gemini-1.5-flash-002"
-	M21 = "models/gemini-1.5-flash-8b"
-	M22 = "models/gemini-1.5-flash-8b-001"
-	M23 = "models/gemini-1.5-flash-8b-latest"
-	M24 = "models/gemini-1.5-flash-8b-exp-0827"
-	M25 = "models/gemini-1.5-flash-8b-exp-0924"
-	M26 = "models/gemini-exp-1114"
-	M27 = "models/embedding-001"
-	M28 = "models/text-embedding-004"
-	M29 = "models/aqa"
+	DefaultModelIndex = 23
 )
 
 var Models = []string{
-	M00,
-	M01,
-	M02,
-	M03,
-	M04,
-	M05,
-	M06,
-	M07,
-	M08,
-	M09,
-	M10,
-	M11,
-	M12,
-	M13,
-	M14,
-	M15,
-	M16,
-	M17,
-	M18,
-	M19,
-	M20,
-	M21,
-	M22,
-	M23,
-	M24,
-	M25,
-	M26,
-	M27,
-	M28,
-	M29,
+	"models/embedding-gecko-001",
+	"models/gemini-1.0-pro-vision-latest",
+	"models/gemini-pro-vision",
+	"models/gemini-1.5-pro-latest",
+	"models/gemini-1.5-pro-001",
+	"models/gemini-1.5-pro-002",
+	"models/gemini-1.5-pro",
+	"models/gemini-1.5-flash-latest",
+	"models/gemini-1.5-flash-001",
+	"models/gemini-1.5-flash-001-tuning",
+	"models/gemini-1.5-flash",
+	"models/gemini-1.5-flash-002",
+	"models/gemini-1.5-flash-8b",
+	"models/gemini-1.5-flash-8b-001",
+	"models/gemini-1.5-flash-8b-latest",
+	"models/gemini-1.5-flash-8b-exp-0827",
+	"models/gemini-1.5-flash-8b-exp-0924",
+	"models/gemini-2.5-pro-exp-03-25",
+	"models/gemini-2.5-pro-preview-03-25",
+	"models/gemini-2.5-flash-preview-04-17",
+	"models/gemini-2.5-flash-preview-05-20",
+	"models/gemini-2.5-flash-preview-04-17-thinking",
+	"models/gemini-2.5-pro-preview-05-06",
+	"models/gemini-2.5-pro-preview-06-05", // default model #23
+	"models/gemini-2.0-flash-exp",
+	"models/gemini-2.0-flash",
+	"models/gemini-2.0-flash-001",
+	"models/gemini-2.0-flash-exp-image-generation",
+	"models/gemini-2.0-flash-lite-001",
+	"models/gemini-2.0-flash-lite",
+	"models/gemini-2.0-flash-preview-image-generation",
+	"models/gemini-2.0-flash-lite-preview-02-05",
+	"models/gemini-2.0-flash-lite-preview",
+	"models/gemini-2.0-pro-exp",
+	"models/gemini-2.0-pro-exp-02-05",
+	"models/gemini-exp-1206",
+	"models/gemini-2.0-flash-thinking-exp-01-21",
+	"models/gemini-2.0-flash-thinking-exp",
+	"models/gemini-2.0-flash-thinking-exp-1219",
+	"models/gemini-2.5-flash-preview-tts",
+	"models/gemini-2.5-pro-preview-tts",
+	"models/learnlm-2.0-flash-experimental",
+	"models/gemma-3-1b-it",
+	"models/gemma-3-4b-it",
+	"models/gemma-3-12b-it",
+	"models/gemma-3-27b-it",
+	"models/gemma-3n-e4b-it",
+	"models/embedding-001",
+	"models/text-embedding-004",
+	"models/gemini-embedding-exp-03-07",
+	"models/gemini-embedding-exp",
+	"models/aqa",
+	"models/imagen-3.0-generate-002",
+	"models/veo-2.0-generate-001",
+	"models/gemini-2.5-flash-preview-native-audio-dialog",
+	"models/gemini-2.5-flash-preview-native-audio-dialog-rai-v3",
+	"models/gemini-2.5-flash-exp-native-audio-thinking-dialog",
+	"models/gemini-2.0-flash-live-001",
 }
 
 const (
