@@ -45,7 +45,7 @@ The prompt ends here
 func init() {
 	rootCmd.AddCommand(chatCmd)
 	f := chatCmd.Flags()
-	f.String(flags.Model, flags.M09, "Model name")
+	f.String(flags.Model, flags.Models[flags.DefaultModelIndex], "Model name")
 	f.StringSlice(flags.File, nil, "Image filenames")
 	f.StringSlice(flags.Format, nil, "Image formats (assumes application/pdf when unspecified)")
 	_ = chatCmd.RegisterFlagCompletionFunc(

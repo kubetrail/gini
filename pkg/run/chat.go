@@ -183,7 +183,7 @@ OuterLoop:
 		case <-ctx.Done():
 			break OuterLoop
 		default:
-			s := "...sending prompt... please wait"
+			s := "     >>> sending prompt... please wait"
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%s\r", s)
 			prompt := strings.Join(lines, "\n")
 			res, err := sendMessage(prompt)
